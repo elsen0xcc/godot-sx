@@ -205,6 +205,33 @@ Sx.from(text_edit.text_changed).debounce(0.25).subscribe(func(): print(text_edit
 Sx.from(text_edit.text_changed).throttle(0.25).subscribe(func(): print(text_edit.text)) # text will be printed every 0.25 seconds when typing continuously.
 ```
 
+### Pacing
+`pace()` is a lossless variant of `throttle()`: instead of dropping items that arrive during the interval, it queues them and emits them later, in order, spaced out. No item is ever lost.
+
+The interval is either a float — the first item of a burst emits instantly, the rest are spaced by the value — or a `Callable(event_n: int) -> float` consulted for every item, including the first. `event_n` counts items in the current burst and resets to 0 once `reset_after` seconds pass without a new incoming item.
+
+```gdscript
+signal bonus_found(bonus: Bonus)
+
+# Simple version: play the sound for every bonus, at most one per 0.5s.
+# A burst of bonuses drains in order, nothing dropped.
+Sx.from(bonus_found)\
+	.pace(0.5)\
+	.subscribe(_play_sound)
+
+# Function version: a pacing curve. First sound instant, the second waits 0.5s,
+# then the gap shrinks linearly down to 0.1s by the 10th, so big bursts drain faster.
+# After 2.0s without a bonus, the curve restarts at event 0.
+Sx.from(bonus_found)\
+	.pace(_bonus_found_pace_interval, 2.0)\
+	.subscribe(_play_sound)
+
+func _bonus_found_pace_interval(event_n: int) -> float:
+	if event_n == 0:
+		return 0.0
+	return clampf(remap(event_n, 1, 10, 0.5, 0.1), 0.1, 0.5)
+```
+
 
 ### Scan operator
 Sx allows for scanning and buffering incoming values inside a stateful operator. This operator behaves similarly to `reduce()` in functional programming.
@@ -568,6 +595,7 @@ for key in dict:
 * take
 * take_while
 * throttle
+* pace
 
 Please note that full implementation of all Rx operators is NOT a goal of this library.
 If you have a more complex problem that cannot be solved with Sx, then use GodotRx instead.

@@ -172,6 +172,19 @@ func throttle(throttle_time: float, process_always := true, process_in_physics :
 	return cloned
 
 
+## Paces emissions without dropping any (a lossless [method throttle]): each item waits so that
+## at least [b]interval[/b] separates emissions, and queued items emit in order.
+## [b]interval[/b] is a float (the first item of a burst emits instantly, the rest are spaced),
+## or a Callable(event_n: int) -> float consulted for every item including the first. event_n
+## counts items in the current burst and resets to 0 after [b]reset_after[/b] seconds without a
+## new incoming item.
+## The remaining arguments are consistent with Godot's [method SceneTree.create_timer] method.
+func pace(interval: Variant, reset_after := INF, process_always := true, process_in_physics := false, ignore_timescale := false) -> SxSignal:
+	var cloned := clone()
+	cloned._operators.append(Sx.PaceOperator.new(interval, reset_after, process_always, process_in_physics, ignore_timescale))
+	return cloned
+
+
 func _clone() -> SxSignal:
 	return null
 	
