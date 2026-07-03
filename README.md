@@ -588,6 +588,7 @@ for key in dict:
 * map
 * merge
 * merge_from
+* pace
 * scan
 * skip
 * skip_while
@@ -595,7 +596,6 @@ for key in dict:
 * take
 * take_while
 * throttle
-* pace
 
 Please note that full implementation of all Rx operators is NOT a goal of this library.
 If you have a more complex problem that cannot be solved with Sx, then use GodotRx instead.
