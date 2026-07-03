@@ -206,22 +206,29 @@ Sx.from(text_edit.text_changed).throttle(0.25).subscribe(func(): print(text_edit
 ```
 
 ### Pacing
-`pace()` is a lossless variant of `throttle()`: instead of dropping items that arrive during the interval, it queues them and emits them later, in order, spaced out. No item is ever lost.
+Sx provides a `pace()` operator, which spaces out events according to an interval.
+Unlike `throttle()`, no event is ever dropped: a burst is queued and drained in order.
 
-The interval is either a float — the first item of a burst emits instantly, the rest are spaced by the value — or a `Callable(event_n: int) -> float` consulted for every item, including the first. `event_n` counts items in the current burst and resets to 0 once `reset_after` seconds pass without a new incoming item.
+`pace()` accepts a constant interval. The first event is emitted immediately and each following one is spaced out by `interval` seconds:
 
 ```gdscript
 signal bonus_found(bonus: Bonus)
 
-# Simple version: play the sound for every bonus, at most one per 0.5s.
+# Play the sound for every bonus, at most one per 0.5s.
 # A burst of bonuses drains in order, nothing dropped.
 Sx.from(bonus_found)\
 	.pace(0.5)\
 	.subscribe(_play_sound)
+```
 
-# Function version: a pacing curve. First sound instant, the second waits 0.5s,
-# then the gap shrinks linearly down to 0.1s by the 10th, so big bursts drain faster.
-# After 2.0s without a bonus, the curve restarts at event 0.
+You can also pass a function to compute a dynamic interval. It is called with the event's index (0, 1, 2, ...) and returns the gap before that event. Return `0.0` for index 0 to emit the first one instantly.
+
+The optional `reset_after` restarts the counting after that many seconds without a new event (default: never).
+
+```gdscript
+# The first bonus is instant, the next ones are paced by 0.5s,
+# and after 10 events by 0.1s.
+# After 2.0s without a bonus, the counter restarts at 0.
 Sx.from(bonus_found)\
 	.pace(_bonus_found_pace_interval, 2.0)\
 	.subscribe(_play_sound)
@@ -229,9 +236,14 @@ Sx.from(bonus_found)\
 func _bonus_found_pace_interval(event_n: int) -> float:
 	if event_n == 0:
 		return 0.0
-	return clampf(remap(event_n, 1, 10, 0.5, 0.1), 0.1, 0.5)
+	elif event_n <= 10:
+		return 0.5
+	else:
+		return 0.1
 ```
 
+This pacing can be used to turn a burst of events into a *slot machine* style scoring system, going
+"ding....ding...ding.ding.ding.dingdingdingdingdgdgdg".
 
 ### Scan operator
 Sx allows for scanning and buffering incoming values inside a stateful operator. This operator behaves similarly to `reduce()` in functional programming.
