@@ -11,6 +11,7 @@ const ElementAtOperator := preload("res://addons/signal_extensions/operators/sx_
 const FilterOperator := preload("res://addons/signal_extensions/operators/sx_filter_operator.gd")
 const FirstOperator := preload("res://addons/signal_extensions/operators/sx_first_operator.gd")
 const MapOperator := preload("res://addons/signal_extensions/operators/sx_map_operator.gd")
+const PaceOperator := preload("res://addons/signal_extensions/operators/sx_pace_operator.gd")
 const ScanOperator := preload("res://addons/signal_extensions/operators/sx_scan_operator.gd")
 const SkipOperator := preload("res://addons/signal_extensions/operators/sx_skip_operator.gd")
 const SkipWhileOperator := preload("res://addons/signal_extensions/operators/sx_skip_while_operator.gd")
@@ -18,7 +19,6 @@ const TakeOperator := preload("res://addons/signal_extensions/operators/sx_take_
 const TakeWhileOperator := preload("res://addons/signal_extensions/operators/sx_take_while_operator.gd")
 const DebounceOperator := preload("res://addons/signal_extensions/operators/sx_debounce_operator.gd")
 const ThrottleOperator := preload("res://addons/signal_extensions/operators/sx_throttle_operator.gd")
-const PaceOperator := preload("res://addons/signal_extensions/operators/sx_pace_operator.gd")
 
 const BasicSignal := preload("res://addons/signal_extensions/signals/sx_basic_signal.gd")
 const MergedSignal := preload("res://addons/signal_extensions/signals/sx_merged_signal.gd")

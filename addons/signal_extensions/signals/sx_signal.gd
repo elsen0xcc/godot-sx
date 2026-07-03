@@ -112,6 +112,16 @@ func merge_from(signals: Array[Signal]) -> SxSignal:
 	return merge(converted)
 
 
+## Paces the signal without dropping any item.
+## [b]interval[/b] can be a float or a function: func(event_n: int) -> float.
+## This method has arguments consistent with Godot's [method SceneTree.create_timer] method.
+## See that method's documentation for more information.
+func pace(interval: Variant, reset_after := INF, process_always := true, process_in_physics := false, ignore_timescale := false) -> SxSignal:
+	var cloned := clone()
+	cloned._operators.append(Sx.PaceOperator.new(interval, reset_after, process_always, process_in_physics, ignore_timescale))
+	return cloned
+
+
 ## Scans the emitted items and can reduce them to a single value over time.
 ## Reducing function: func(acc: ACC_TYPE, ...args: Array[Variant]) -> ACC_TYPE
 func scan(callable: Callable, initial_value: Variant) -> SxSignal:
@@ -169,19 +179,6 @@ func take_while(callable: Callable) -> SxSignal:
 func throttle(throttle_time: float, process_always := true, process_in_physics := false, ignore_timescale := false) -> SxSignal:
 	var cloned := clone()
 	cloned._operators.append(Sx.ThrottleOperator.new(throttle_time, process_always, process_in_physics, ignore_timescale))
-	return cloned
-
-
-## Paces emissions without dropping any (a lossless [method throttle]): each item waits so that
-## at least [b]interval[/b] separates emissions, and queued items emit in order.
-## [b]interval[/b] is a float (the first item of a burst emits instantly, the rest are spaced),
-## or a Callable(event_n: int) -> float consulted for every item including the first. event_n
-## counts items in the current burst and resets to 0 after [b]reset_after[/b] seconds without a
-## new incoming item.
-## The remaining arguments are consistent with Godot's [method SceneTree.create_timer] method.
-func pace(interval: Variant, reset_after := INF, process_always := true, process_in_physics := false, ignore_timescale := false) -> SxSignal:
-	var cloned := clone()
-	cloned._operators.append(Sx.PaceOperator.new(interval, reset_after, process_always, process_in_physics, ignore_timescale))
 	return cloned
 
 
